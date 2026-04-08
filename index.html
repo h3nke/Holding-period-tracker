@@ -15,10 +15,16 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Toast slide-in from top */
+        .toast-enter { animation: toastIn 0.35s ease-out forwards; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
+    <!-- ==========================================
+         AUTH VIEW
+    ========================================== -->
     <div id="authView" class="flex-1 flex items-center justify-center p-4 hidden fade-in">
         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 w-full max-w-md">
             <div class="flex justify-center mb-6">
@@ -27,6 +33,7 @@
             <h1 class="text-2xl font-semibold text-center mb-2">Välkommen tillbaka</h1>
             <p class="text-slate-500 text-center mb-8 text-sm">Logga in för att se dina innehav</p>
             
+            <!-- Login form -->
             <form id="authForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">E-post</label>
@@ -35,6 +42,10 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Lösenord</label>
                     <input type="password" id="passwordInput" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                </div>
+                <!-- FUNKTION 1: Glömt lösenord-länk -->
+                <div class="text-right">
+                    <button type="button" id="forgotPasswordLink" class="text-sm text-indigo-500 hover:text-indigo-700 transition-colors">Glömt lösenordet?</button>
                 </div>
                 <div id="authError" class="text-red-500 text-sm hidden"></div>
                 <div class="flex gap-3 pt-2">
@@ -45,9 +56,24 @@
                     <button type="button" id="registerBtn" class="flex-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-2 rounded-lg font-medium transition-colors">Skapa konto</button>
                 </div>
             </form>
+
+            <!-- FUNKTION 1: Glömt lösenord-formulär (dolt som standard) -->
+            <div id="forgotPasswordForm" class="hidden mt-4 pt-4 border-t border-slate-100 space-y-3">
+                <p class="text-sm text-slate-600 font-medium">Återställ lösenord</p>
+                <p class="text-xs text-slate-400">Ange din e-postadress så skickar vi en återställningslänk.</p>
+                <input type="email" id="resetEmailInput" placeholder="din@epost.se" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm transition-all">
+                <div class="flex gap-2">
+                    <button type="button" id="sendResetBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium transition-colors">Skicka återställningslänk</button>
+                    <button type="button" id="cancelResetBtn" class="px-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 py-2 rounded-lg text-sm font-medium transition-colors">Avbryt</button>
+                </div>
+                <div id="resetMsg" class="text-sm hidden"></div>
+            </div>
         </div>
     </div>
 
+    <!-- ==========================================
+         DASHBOARD VIEW
+    ========================================== -->
     <div id="dashboardView" class="hidden flex-1 flex flex-col">
         <nav class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
             <div class="flex items-center gap-2">
@@ -87,6 +113,11 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Köpt Datum</label>
                                 <input type="date" id="purchaseDate" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
                             </div>
+                            <!-- FUNKTION 4: Kommentarsfält -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Kommentar <span class="text-slate-400 font-normal">(frivillig)</span></label>
+                                <textarea id="holdingComment" maxlength="500" rows="3" placeholder="Varför köpte du detta bolag? (valfritt)" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm resize-none"></textarea>
+                            </div>
                             <button type="submit" id="addBtn" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
                                 <span id="addText">Lägg till</span>
                                 <div id="addSpinner" class="spinner hidden"></div>
@@ -109,16 +140,18 @@
                                         <th class="px-6 py-3 font-medium cursor-pointer hover:text-slate-800 transition-colors" onclick="app.sortData('stock_name')">Namn <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
                                         <th class="px-6 py-3 font-medium cursor-pointer hover:text-slate-800 transition-colors" onclick="app.sortData('purchase_date')">Köpt Datum <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
                                         <th class="px-6 py-3 font-medium cursor-pointer hover:text-slate-800 transition-colors" onclick="app.sortData('days_held')">Innehavstid <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
+                                        <!-- FUNKTION 4: Kommentarskolumn -->
+                                        <th class="px-6 py-3 font-medium">Kommentar</th>
                                         <th class="px-6 py-3 font-medium text-right">Åtgärd</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody" class="divide-y divide-slate-50">
-                                    </tbody>
+                                </tbody>
                             </table>
                         </div>
 
                         <div id="mobileCards" class="md:hidden divide-y divide-slate-100">
-                            </div>
+                        </div>
 
                         <div id="dataStateMsg" class="p-8 text-center text-slate-500 text-sm">
                             Laddar data...
@@ -129,13 +162,77 @@
         </main>
     </div>
 
+    <!-- ==========================================
+         FUNKTION 2: Edit-modal
+    ========================================== -->
+    <div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm fade-in">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 w-full max-w-md p-6">
+            <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
+                <i data-lucide="pencil" class="w-5 h-5 text-indigo-500"></i> Redigera innehav
+            </h3>
+            <div class="space-y-4">
+                <input type="hidden" id="editId">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Aktie/Tillgång</label>
+                    <input type="text" id="editStockName" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Köpt Datum</label>
+                    <input type="date" id="editPurchaseDate" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Kommentar <span class="text-slate-400 font-normal">(frivillig)</span></label>
+                    <textarea id="editComment" maxlength="500" rows="3" placeholder="Varför köpte du detta bolag? (valfritt)" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm resize-none"></textarea>
+                </div>
+                <div id="editError" class="text-red-500 text-sm hidden"></div>
+                <div class="flex gap-3 pt-1">
+                    <button id="saveEditBtn" onclick="app.saveEdit()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
+                        <span id="saveEditText">Spara</span>
+                        <div id="saveEditSpinner" class="spinner hidden"></div>
+                    </button>
+                    <button onclick="app.closeModal()" class="flex-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-2 rounded-lg font-medium transition-colors">Avbryt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         FUNKTION 1: Nytt lösenord-modal (PASSWORD_RECOVERY)
+    ========================================== -->
+    <div id="newPasswordModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm fade-in">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 w-full max-w-md p-6">
+            <div class="flex justify-center mb-4">
+                <div class="bg-indigo-50 p-3 rounded-xl"><i data-lucide="key-round" class="text-indigo-600 w-7 h-7"></i></div>
+            </div>
+            <h3 class="font-semibold text-lg text-center mb-1">Ange nytt lösenord</h3>
+            <p class="text-slate-500 text-sm text-center mb-5">Välj ett nytt lösenord för ditt konto.</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nytt lösenord</label>
+                    <input type="password" id="newPasswordInput" placeholder="Minst 6 tecken" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                </div>
+                <div id="newPasswordError" class="text-sm hidden"></div>
+                <button id="updatePasswordBtn" onclick="app.handleUpdatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
+                    <span id="updatePasswordText">Uppdatera lösenord</span>
+                    <div id="updatePasswordSpinner" class="spinner hidden"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==========================================
         // 1. KONFIGURATION - KLISTRA IN DINA NYCKLAR HÄR
         // ==========================================
         const SUPABASE_URL = 'https://socixgiusmrnejuyeyha.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvY2l4Z2l1c21ybmVqdXlleWhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjY0MjUsImV4cCI6MjA4NDMwMjQyNX0.XZ4pQcji0mk8A5-FmBvge_ENg4mGd5EU_c8pKWX5oZY';
-        
+
+        // ==========================================
+        // DATABAS-MIGRATION (kör manuellt i Supabase Dashboard)
+        // ==========================================
+        // ALTER TABLE holdings ADD COLUMN IF NOT EXISTS comment TEXT DEFAULT '';
+        // ALTER TABLE holdings ADD COLUMN IF NOT EXISTS last_notified_period INTEGER DEFAULT 0;
+
         // Initiera Supabase
         const supabaseUrl = SUPABASE_URL;
         const supabaseKey = SUPABASE_ANON_KEY;
@@ -149,17 +246,35 @@
             holdings: [],
             sortCol: 'purchase_date',
             sortAsc: true,
+            toastOffset: 0, // Håller koll på staplade toasts
 
             async init() {
                 lucide.createIcons();
-                document.getElementById('purchaseDate').max = new Date().toISOString().split("T")[0]; // Kan ej köpa i framtiden
+                document.getElementById('purchaseDate').max = new Date().toISOString().split("T")[0];
                 
-                // Event Listeners
+                // Event Listeners – befintliga
                 document.getElementById('authForm').addEventListener('submit', this.handleLogin.bind(this));
                 document.getElementById('registerBtn').addEventListener('click', this.handleRegister.bind(this));
                 document.getElementById('logoutBtn').addEventListener('click', this.handleLogout.bind(this));
                 document.getElementById('addHoldingForm').addEventListener('submit', this.handleAdd.bind(this));
                 document.getElementById('refreshBtn').addEventListener('click', () => this.fetchHoldings());
+
+                // FUNKTION 1: Glömt lösenord – event listeners
+                document.getElementById('forgotPasswordLink').addEventListener('click', () => {
+                    document.getElementById('forgotPasswordForm').classList.remove('hidden');
+                    document.getElementById('resetEmailInput').value = document.getElementById('emailInput').value;
+                    document.getElementById('authError').classList.add('hidden');
+                });
+                document.getElementById('cancelResetBtn').addEventListener('click', () => {
+                    document.getElementById('forgotPasswordForm').classList.add('hidden');
+                    document.getElementById('resetMsg').classList.add('hidden');
+                });
+                document.getElementById('sendResetBtn').addEventListener('click', this.handleForgotPassword.bind(this));
+
+                // Stäng edit-modal vid klick utanför
+                document.getElementById('editModal').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('editModal')) this.closeModal();
+                });
 
                 // Kolla session
                 const { data: { session } } = await supabaseClient.auth.getSession();
@@ -172,6 +287,12 @@
 
                 // Lyssna på Auth-förändringar
                 supabaseClient.auth.onAuthStateChange((_event, session) => {
+                    // FUNKTION 1: Fånga PASSWORD_RECOVERY-händelse
+                    if (_event === 'PASSWORD_RECOVERY') {
+                        document.getElementById('newPasswordModal').classList.remove('hidden');
+                        lucide.createIcons();
+                        return;
+                    }
                     if (session) {
                         this.user = session.user;
                         this.showDashboard();
@@ -197,7 +318,7 @@
                 this.fetchHoldings();
             },
 
-            // --- Autentisering ---
+            // --- Autentisering (OFÖRÄNDRADE) ---
             async handleLogin(e) {
                 e.preventDefault();
                 this.setLoading('loginBtn', 'loginText', 'loginSpinner', true);
@@ -242,6 +363,68 @@
                 await supabaseClient.auth.signOut();
             },
 
+            // --- FUNKTION 1: Glömt lösenord ---
+            async handleForgotPassword() {
+                const email = document.getElementById('resetEmailInput').value.trim();
+                const msgEl = document.getElementById('resetMsg');
+
+                if (!email) {
+                    msgEl.textContent = 'Ange din e-postadress.';
+                    msgEl.className = 'text-sm text-red-500';
+                    msgEl.classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('sendResetBtn').disabled = true;
+                document.getElementById('sendResetBtn').textContent = 'Skickar...';
+
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.href
+                });
+
+                document.getElementById('sendResetBtn').disabled = false;
+                document.getElementById('sendResetBtn').textContent = 'Skicka återställningslänk';
+
+                if (error) {
+                    msgEl.textContent = 'Fel: ' + error.message;
+                    msgEl.className = 'text-sm text-red-500';
+                } else {
+                    msgEl.textContent = '✓ Länk skickad! Kolla din inkorg (och skräppost).';
+                    msgEl.className = 'text-sm text-green-600';
+                }
+                msgEl.classList.remove('hidden');
+            },
+
+            // --- FUNKTION 1: Uppdatera lösenord efter recovery ---
+            async handleUpdatePassword() {
+                const newPassword = document.getElementById('newPasswordInput').value;
+                const errEl = document.getElementById('newPasswordError');
+
+                if (!newPassword || newPassword.length < 6) {
+                    errEl.textContent = 'Lösenordet måste vara minst 6 tecken.';
+                    errEl.className = 'text-sm text-red-500';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+
+                this.setLoading('updatePasswordBtn', 'updatePasswordText', 'updatePasswordSpinner', true);
+                const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+                this.setLoading('updatePasswordBtn', 'updatePasswordText', 'updatePasswordSpinner', false);
+
+                if (error) {
+                    errEl.textContent = 'Fel: ' + error.message;
+                    errEl.className = 'text-sm text-red-500';
+                    errEl.classList.remove('hidden');
+                } else {
+                    errEl.textContent = '✓ Lösenordet har uppdaterats! Du är nu inloggad.';
+                    errEl.className = 'text-sm text-green-600';
+                    errEl.classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('newPasswordModal').classList.add('hidden');
+                    }, 2000);
+                }
+            },
+
             // --- Databasoperationer ---
             async fetchHoldings() {
                 document.getElementById('dataStateMsg').innerHTML = '<div class="spinner border-slate-300 border-t-indigo-600 mx-auto mb-2"></div> Laddar...';
@@ -267,6 +450,9 @@
                 });
 
                 this.renderData();
+
+                // FUNKTION 3: Kontrollera jubileumsmilstolpar efter rendering
+                this.checkMilestones();
             },
 
             async handleAdd(e) {
@@ -275,10 +461,12 @@
                 
                 const stock_name = document.getElementById('stockName').value;
                 const purchase_date = document.getElementById('purchaseDate').value;
+                // FUNKTION 4: Hämta kommentar
+                const comment = document.getElementById('holdingComment').value.trim();
 
                 const { error } = await supabaseClient
                     .from('holdings')
-                    .insert([{ stock_name, purchase_date, user_id: this.user.id }]);
+                    .insert([{ stock_name, purchase_date, user_id: this.user.id, comment }]);
 
                 this.setLoading('addBtn', 'addText', 'addSpinner', false);
 
@@ -305,7 +493,110 @@
                 }
             },
 
-            // --- Beräkningar ---
+            // --- FUNKTION 2: Redigera innehav ---
+            handleEdit(id) {
+                const holding = this.holdings.find(h => h.id === id);
+                if (!holding) return;
+
+                document.getElementById('editId').value = id;
+                document.getElementById('editStockName').value = holding.stock_name;
+                document.getElementById('editPurchaseDate').value = holding.purchase_date;
+                document.getElementById('editComment').value = holding.comment || '';
+                document.getElementById('editError').classList.add('hidden');
+                document.getElementById('editModal').classList.remove('hidden');
+                lucide.createIcons();
+            },
+
+            async saveEdit() {
+                const id = document.getElementById('editId').value;
+                const stock_name = document.getElementById('editStockName').value.trim();
+                const purchase_date = document.getElementById('editPurchaseDate').value;
+                const comment = document.getElementById('editComment').value.trim();
+                const errEl = document.getElementById('editError');
+
+                if (!stock_name || !purchase_date) {
+                    errEl.textContent = 'Namn och datum är obligatoriska.';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+
+                this.setLoading('saveEditBtn', 'saveEditText', 'saveEditSpinner', true);
+
+                const { error } = await supabaseClient
+                    .from('holdings')
+                    .update({ stock_name, purchase_date, comment })
+                    .eq('id', id);
+
+                this.setLoading('saveEditBtn', 'saveEditText', 'saveEditSpinner', false);
+
+                if (error) {
+                    errEl.textContent = 'Fel vid sparande: ' + error.message;
+                    errEl.classList.remove('hidden');
+                } else {
+                    this.closeModal();
+                    this.fetchHoldings();
+                }
+            },
+
+            closeModal() {
+                document.getElementById('editModal').classList.add('hidden');
+            },
+
+            // --- FUNKTION 3: Jubileumsmilstolpar ---
+            async checkMilestones() {
+                // Begär notistillstånd om möjligt (HTTPS + stödd webbläsare)
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+
+                for (const h of this.holdings) {
+                    const currentPeriod = Math.floor(h.days_held / 182);
+                    const lastNotified = h.last_notified_period || 0;
+
+                    if (currentPeriod > 0 && currentPeriod > lastNotified) {
+                        // Använd befintlig calcDuration för korrekt tidsformatering
+                        const durationStr = this.calcDuration(h.purchase_date).str;
+                        const message = `🎉 ${h.stock_name} har du ägt i ${durationStr} – fortsätt så!`;
+
+                        // Visa toast (alltid)
+                        this.showToast(message);
+
+                        // Försök webb-notis om tillstånd finns
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('HoldingTracker – Jubileum! 🎉', { body: message });
+                        }
+
+                        // Uppdatera last_notified_period i Supabase
+                        await supabaseClient
+                            .from('holdings')
+                            .update({ last_notified_period: currentPeriod })
+                            .eq('id', h.id);
+                    }
+                }
+            },
+
+            // --- FUNKTION 3: Toast-notis ---
+            showToast(message, durationMs = 6000) {
+                const toast = document.createElement('div');
+                const topOffset = 16 + (this.toastOffset * 68);
+                this.toastOffset++;
+
+                toast.className = 'toast-enter fixed right-4 z-50 bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium max-w-xs';
+                toast.style.top = `${topOffset}px`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 0.4s ease';
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toast.remove();
+                        this.toastOffset = Math.max(0, this.toastOffset - 1);
+                    }, 400);
+                }, durationMs);
+            },
+
+            // --- Beräkningar (OFÖRÄNDRADE) ---
             calcDuration(dateStr) {
                 const start = new Date(dateStr);
                 const end = new Date();
@@ -396,6 +687,12 @@
                 let cardHtml = '';
 
                 this.holdings.forEach(h => {
+                    // FUNKTION 4: Kommentar – trunkera vid 60 tecken för desktop
+                    const commentShort = h.comment && h.comment.length > 60
+                        ? this.escapeHTML(h.comment.substring(0, 60)) + '...'
+                        : this.escapeHTML(h.comment || '');
+                    const commentFull = this.escapeHTML(h.comment || '');
+
                     // Desktop Row
                     trHtml += `
                         <tr class="hover:bg-slate-50 transition-colors group">
@@ -406,27 +703,49 @@
                                     ${h.durationStr}
                                 </span>
                             </td>
+                            <!-- FUNKTION 4: Kommentarskolumn -->
+                            <td class="px-6 py-4 text-slate-400 text-sm" title="${commentFull}">${commentShort || '<span class="text-slate-200">—</span>'}</td>
                             <td class="px-6 py-4 text-right">
-                                <button onclick="app.handleDelete('${h.id}')" class="text-slate-300 hover:text-red-500 transition-colors">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
+                                <div class="flex justify-end items-center gap-2">
+                                    <!-- FUNKTION 2: Edit-knapp -->
+                                    <button onclick="app.handleEdit('${h.id}')" class="text-slate-300 hover:text-indigo-500 transition-colors" title="Redigera">
+                                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="app.handleDelete('${h.id}')" class="text-slate-300 hover:text-red-500 transition-colors" title="Radera">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
 
                     // Mobile Card
+                    const commentMobile = h.comment ? `
+                        <div class="flex items-start gap-1.5 text-xs text-slate-400 mt-1">
+                            <i data-lucide="message-square" class="w-3 h-3 mt-0.5 shrink-0"></i>
+                            <span>${this.escapeHTML(h.comment)}</span>
+                        </div>` : '';
+
                     cardHtml += `
                         <div class="p-4 flex flex-col gap-2">
                             <div class="flex justify-between items-start">
                                 <span class="font-medium text-slate-800">${this.escapeHTML(h.stock_name)}</span>
-                                <button onclick="app.handleDelete('${h.id}')" class="text-slate-300 hover:text-red-500 p-1">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
+                                <div class="flex items-center gap-1">
+                                    <!-- FUNKTION 2: Edit-knapp mobil -->
+                                    <button onclick="app.handleEdit('${h.id}')" class="text-slate-300 hover:text-indigo-500 p-1">
+                                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="app.handleDelete('${h.id}')" class="text-slate-300 hover:text-red-500 p-1">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-slate-500"><i data-lucide="calendar" class="inline w-3 h-3 mr-1"></i>${h.purchase_date}</span>
                                 <span class="font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md text-xs">${h.durationStr}</span>
                             </div>
+                            <!-- FUNKTION 4: Kommentar mobil -->
+                            ${commentMobile}
                         </div>
                     `;
                 });
@@ -443,6 +762,7 @@
             },
 
             escapeHTML(str) {
+                if (!str) return '';
                 return str.replace(/[&<>'"]/g, 
                     tag => ({
                         '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
