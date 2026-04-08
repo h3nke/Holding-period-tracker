@@ -247,6 +247,7 @@
             sortCol: 'purchase_date',
             sortAsc: true,
             toastOffset: 0, // Håller koll på staplade toasts
+            isRecoveringPassword: false, // Flagga för att blockera SIGNED_IN under lösenordsbyte
 
             async init() {
                 lucide.createIcons();
@@ -287,10 +288,15 @@
 
                 // Lyssna på Auth-förändringar
                 supabaseClient.auth.onAuthStateChange((_event, session) => {
-                    // FUNKTION 1: Fånga PASSWORD_RECOVERY-händelse
+                    // FUNKTION 1: Fånga PASSWORD_RECOVERY – sätt flagga och visa modal
                     if (_event === 'PASSWORD_RECOVERY') {
+                        this.isRecoveringPassword = true;
                         document.getElementById('newPasswordModal').classList.remove('hidden');
                         lucide.createIcons();
+                        return;
+                    }
+                    // Blockera SIGNED_IN om vi är mitt i ett lösenordsbyte
+                    if (_event === 'SIGNED_IN' && this.isRecoveringPassword) {
                         return;
                     }
                     if (session) {
@@ -416,12 +422,19 @@
                     errEl.className = 'text-sm text-red-500';
                     errEl.classList.remove('hidden');
                 } else {
-                    errEl.textContent = '✓ Lösenordet har uppdaterats! Du är nu inloggad.';
+                    errEl.textContent = '✓ Lösenordet har uppdaterats!';
                     errEl.className = 'text-sm text-green-600';
                     errEl.classList.remove('hidden');
-                    setTimeout(() => {
+                    setTimeout(async () => {
+                        this.isRecoveringPassword = false; // Nollställ flaggan
                         document.getElementById('newPasswordModal').classList.add('hidden');
-                    }, 2000);
+                        // Hämta aktuell session och navigera till dashboard
+                        const { data: { session } } = await supabaseClient.auth.getSession();
+                        if (session) {
+                            this.user = session.user;
+                            this.showDashboard();
+                        }
+                    }, 1500);
                 }
             },
 
