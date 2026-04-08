@@ -563,7 +563,7 @@
                 }
 
                 for (const h of this.holdings) {
-                    const currentPeriod = Math.floor(h.days_held / 182);
+                    const currentPeriod = Math.floor(h.days_held / 91);
                     const lastNotified = h.last_notified_period || 0;
 
                     if (currentPeriod > 0 && currentPeriod > lastNotified) {
