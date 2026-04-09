@@ -579,7 +579,7 @@
                     // Visa toast om next_notify_date är idag eller har passerat
                     if (notifyDate <= today) {
                         const durationStr = this.calcDuration(h.purchase_date).str;
-                        const message = `🎉 ${h.stock_name} har du ägt i ${durationStr} – fortsätt så!`;
+                        const message = `🎉 Du har ägt ${h.stock_name} i ${durationStr} – fortsätt så!`;
 
                         this.showToast(message);
 
