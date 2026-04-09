@@ -474,12 +474,14 @@
                 
                 const stock_name = document.getElementById('stockName').value;
                 const purchase_date = document.getElementById('purchaseDate').value;
-                // FUNKTION 4: Hämta kommentar
                 const comment = document.getElementById('holdingComment').value.trim();
+
+                // Beräkna nästa jämna 3-månadersgräns från purchase_date som ligger i framtiden
+                const next_notify_date = this.calcNextNotifyDate(purchase_date);
 
                 const { error } = await supabaseClient
                     .from('holdings')
-                    .insert([{ stock_name, purchase_date, user_id: this.user.id, comment }]);
+                    .insert([{ stock_name, purchase_date, user_id: this.user.id, comment, next_notify_date }]);
 
                 this.setLoading('addBtn', 'addText', 'addSpinner', false);
 
@@ -533,11 +535,14 @@
                     return;
                 }
 
+                // Räkna om next_notify_date om purchase_date ändrats
+                const next_notify_date = this.calcNextNotifyDate(purchase_date);
+
                 this.setLoading('saveEditBtn', 'saveEditText', 'saveEditSpinner', true);
 
                 const { error } = await supabaseClient
                     .from('holdings')
-                    .update({ stock_name, purchase_date, comment })
+                    .update({ stock_name, purchase_date, comment, next_notify_date })
                     .eq('id', id);
 
                 this.setLoading('saveEditBtn', 'saveEditText', 'saveEditSpinner', false);
@@ -562,30 +567,43 @@
                     Notification.requestPermission();
                 }
 
-                for (const h of this.holdings) {
-                    const currentPeriod = Math.floor(h.days_held / 91);
-                    const lastNotified = h.last_notified_period || 0;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-                    if (currentPeriod > 0 && currentPeriod > lastNotified) {
-                        // Använd befintlig calcDuration för korrekt tidsformatering
+                for (const h of this.holdings) {
+                    if (!h.next_notify_date) continue;
+
+                    const notifyDate = new Date(h.next_notify_date);
+                    notifyDate.setHours(0, 0, 0, 0);
+
+                    // Visa toast om next_notify_date är idag eller har passerat
+                    if (notifyDate <= today) {
                         const durationStr = this.calcDuration(h.purchase_date).str;
                         const message = `🎉 ${h.stock_name} har du ägt i ${durationStr} – fortsätt så!`;
 
-                        // Visa toast (alltid)
                         this.showToast(message);
 
-                        // Försök webb-notis om tillstånd finns
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('HoldingTracker – Jubileum! 🎉', { body: message });
                         }
-
-                        // Uppdatera last_notified_period i Supabase
-                        await supabaseClient
-                            .from('holdings')
-                            .update({ last_notified_period: currentPeriod })
-                            .eq('id', h.id);
                     }
                 }
+            },
+
+            // Beräkna nästa jämna 3-månadersgräns från purchase_date som ligger i framtiden
+            calcNextNotifyDate(purchaseDateStr) {
+                const purchase = new Date(purchaseDateStr);
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+
+                const totalMonths =
+                    (now.getFullYear() - purchase.getFullYear()) * 12 +
+                    (now.getMonth() - purchase.getMonth());
+                const periodsElapsed = Math.floor(totalMonths / 3);
+
+                const nextDate = new Date(purchase);
+                nextDate.setMonth(nextDate.getMonth() + (periodsElapsed + 1) * 3);
+                return nextDate.toISOString().split('T')[0];
             },
 
             // --- FUNKTION 3: Toast-notis ---
