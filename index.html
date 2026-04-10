@@ -10,61 +10,133 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        /* ── Bas ── */
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* Toast slide-in from top */
         .toast-enter { animation: toastIn 0.35s ease-out forwards; }
         @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Ljust läge (standard) ── */
+        :root {
+            --bg-page:       #f8fafc;
+            --bg-card:       #ffffff;
+            --bg-nav:        #ffffff;
+            --bg-input:      #ffffff;
+            --bg-hover:      #f8fafc;
+            --bg-table-head: #ffffff;
+            --bg-sidebar:    #f8fafc50;
+            --border:        #e2e8f0;
+            --border-light:  #f1f5f9;
+            --text-primary:  #1e293b;
+            --text-secondary:#64748b;
+            --text-label:    #334155;
+            --text-muted:    #94a3b8;
+            --badge-bg:      #d1fae5;
+            --badge-text:    #065f46;
+            --next-bg:       #eff6ff;
+            --next-text:     #1d4ed8;
+            --indigo-soft:   #eef2ff;
+        }
+
+        /* ── Mörkt läge ── */
+        html.dark {
+            --bg-page:       #1a2235;
+            --bg-card:       #1e2a3d;
+            --bg-nav:        #1a2235;
+            --bg-input:      #243048;
+            --bg-hover:      #243048;
+            --bg-table-head: #1e2a3d;
+            --bg-sidebar:    #1a223520;
+            --border:        #2d3f5a;
+            --border-light:  #243048;
+            --text-primary:  #e2e8f0;
+            --text-secondary:#94a3b8;
+            --text-label:    #cbd5e1;
+            --text-muted:    #64748b;
+            --badge-bg:      #064e3b;
+            --badge-text:    #6ee7b7;
+            --next-bg:       #1e3a5f;
+            --next-text:     #93c5fd;
+            --indigo-soft:   #1e274d;
+        }
+
+        body                { background-color: var(--bg-page); color: var(--text-primary); }
+        nav                 { background-color: var(--bg-nav) !important; border-color: var(--border) !important; }
+        .card               { background-color: var(--bg-card); border-color: var(--border); }
+        .card-head          { background-color: var(--bg-sidebar); border-color: var(--border-light); }
+        .dm-input           { background-color: var(--bg-input); border-color: var(--border); color: var(--text-primary); }
+        .dm-input::placeholder { color: var(--text-muted); }
+        .dm-input:focus     { border-color: #6366f1; }
+        .dm-label           { color: var(--text-label); }
+        .dm-text-secondary  { color: var(--text-secondary); }
+        .dm-text-muted      { color: var(--text-muted); }
+        .dm-border          { border-color: var(--border); }
+        .dm-border-light    { border-color: var(--border-light); }
+        .dm-hover:hover     { background-color: var(--bg-hover); }
+        .dm-table-head      { background-color: var(--bg-table-head); border-color: var(--border-light); }
+        .dm-divide > * + *  { border-color: var(--border-light); }
+        .dm-badge           { background-color: var(--badge-bg); color: var(--badge-text); }
+        .dm-next-badge      { background-color: var(--next-bg); color: var(--next-text); }
+        .dm-modal-bg        { background-color: var(--bg-card); border-color: var(--border); }
+        .dm-modal-cancel    { background-color: var(--bg-input); border-color: var(--border); color: var(--text-label); }
+        .dm-modal-cancel:hover { background-color: var(--bg-hover); }
+        .dm-indigo-soft     { background-color: var(--indigo-soft); }
+
+        /* Datuminput i mörkt läge */
+        html.dark input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+        html.dark input[type="date"] { color-scheme: dark; }
+
+        /* Scrollbar i mörkt läge */
+        html.dark ::-webkit-scrollbar { width: 6px; }
+        html.dark ::-webkit-scrollbar-track { background: var(--bg-page); }
+        html.dark ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="antialiased min-h-screen flex flex-col">
 
     <!-- ==========================================
          AUTH VIEW
     ========================================== -->
     <div id="authView" class="flex-1 flex items-center justify-center p-4 hidden fade-in">
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 w-full max-w-md">
+        <div class="card p-8 rounded-2xl shadow-sm border w-full max-w-md">
             <div class="flex justify-center mb-6">
-                <div class="bg-indigo-50 p-3 rounded-xl"><i data-lucide="line-chart" class="text-indigo-600 w-8 h-8"></i></div>
+                <div class="dm-indigo-soft p-3 rounded-xl"><i data-lucide="line-chart" class="text-indigo-500 w-8 h-8"></i></div>
             </div>
             <h1 class="text-2xl font-semibold text-center mb-2">Välkommen tillbaka</h1>
-            <p class="text-slate-500 text-center mb-8 text-sm">Logga in för att se dina innehav</p>
+            <p class="dm-text-secondary text-center mb-8 text-sm">Logga in för att se dina innehav</p>
             
-            <!-- Login form -->
             <form id="authForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">E-post</label>
-                    <input type="email" id="emailInput" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    <label class="block text-sm font-medium dm-label mb-1">E-post</label>
+                    <input type="email" id="emailInput" required class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Lösenord</label>
-                    <input type="password" id="passwordInput" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    <label class="block text-sm font-medium dm-label mb-1">Lösenord</label>
+                    <input type="password" id="passwordInput" required class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                 </div>
-                <!-- FUNKTION 1: Glömt lösenord-länk -->
                 <div class="text-right">
-                    <button type="button" id="forgotPasswordLink" class="text-sm text-indigo-500 hover:text-indigo-700 transition-colors">Glömt lösenordet?</button>
+                    <button type="button" id="forgotPasswordLink" class="text-sm text-indigo-500 hover:text-indigo-400 transition-colors">Glömt lösenordet?</button>
                 </div>
-                <div id="authError" class="text-red-500 text-sm hidden"></div>
+                <div id="authError" class="text-red-400 text-sm hidden"></div>
                 <div class="flex gap-3 pt-2">
                     <button type="submit" id="loginBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
                         <span id="loginText">Logga in</span>
                         <div id="loginSpinner" class="spinner hidden"></div>
                     </button>
-                    <button type="button" id="registerBtn" class="flex-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-2 rounded-lg font-medium transition-colors">Skapa konto</button>
+                    <button type="button" id="registerBtn" class="flex-1 dm-modal-cancel border py-2 rounded-lg font-medium transition-colors">Skapa konto</button>
                 </div>
             </form>
 
-            <!-- FUNKTION 1: Glömt lösenord-formulär (dolt som standard) -->
-            <div id="forgotPasswordForm" class="hidden mt-4 pt-4 border-t border-slate-100 space-y-3">
-                <p class="text-sm text-slate-600 font-medium">Återställ lösenord</p>
-                <p class="text-xs text-slate-400">Ange din e-postadress så skickar vi en återställningslänk.</p>
-                <input type="email" id="resetEmailInput" placeholder="din@epost.se" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm transition-all">
+            <div id="forgotPasswordForm" class="hidden mt-4 pt-4 dm-border border-t space-y-3">
+                <p class="text-sm dm-label font-medium">Återställ lösenord</p>
+                <p class="text-xs dm-text-muted">Ange din e-postadress så skickar vi en återställningslänk.</p>
+                <input type="email" id="resetEmailInput" placeholder="din@epost.se" class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all">
                 <div class="flex gap-2">
                     <button type="button" id="sendResetBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium transition-colors">Skicka återställningslänk</button>
-                    <button type="button" id="cancelResetBtn" class="px-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 py-2 rounded-lg text-sm font-medium transition-colors">Avbryt</button>
+                    <button type="button" id="cancelResetBtn" class="px-4 dm-modal-cancel border py-2 rounded-lg text-sm font-medium transition-colors">Avbryt</button>
                 </div>
                 <div id="resetMsg" class="text-sm hidden"></div>
             </div>
@@ -75,14 +147,18 @@
          DASHBOARD VIEW
     ========================================== -->
     <div id="dashboardView" class="hidden flex-1 flex flex-col">
-        <nav class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <nav class="border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10 dm-border">
             <div class="flex items-center gap-2">
-                <div class="bg-indigo-50 p-2 rounded-lg"><i data-lucide="pie-chart" class="text-indigo-600 w-5 h-5"></i></div>
+                <div class="dm-indigo-soft p-2 rounded-lg"><i data-lucide="pie-chart" class="text-indigo-500 w-5 h-5"></i></div>
                 <span class="font-semibold text-lg tracking-tight">HoldingTracker</span>
             </div>
-            <div class="flex items-center gap-4">
-                <span id="userEmail" class="text-sm text-slate-500 hidden sm:block"></span>
-                <button id="logoutBtn" class="text-slate-500 hover:text-slate-800 transition-colors p-2 rounded-md hover:bg-slate-50">
+            <div class="flex items-center gap-2">
+                <span id="userEmail" class="text-sm dm-text-secondary hidden sm:block mr-2"></span>
+                <!-- Mörkläge-toggle -->
+                <button id="darkModeBtn" class="dm-text-secondary hover:text-indigo-500 transition-colors p-2 rounded-md dm-hover" title="Växla mörkt/ljust läge">
+                    <i data-lucide="moon" id="darkModeIcon" class="w-5 h-5"></i>
+                </button>
+                <button id="logoutBtn" class="dm-text-secondary hover:text-red-400 transition-colors p-2 rounded-md dm-hover">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -90,35 +166,36 @@
 
         <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8">
             
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8 flex items-center justify-between">
+            <div class="card rounded-2xl p-6 shadow-sm border mb-8 flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-slate-500 mb-1">Genomsnittlig Innehavstid</p>
-                    <h2 id="avgHoldTime" class="text-3xl font-semibold text-slate-800">--</h2>
+                    <p class="text-sm font-medium dm-text-secondary mb-1">Genomsnittlig Innehavstid</p>
+                    <h2 id="avgHoldTime" class="text-3xl font-semibold">--</h2>
                 </div>
-                <div class="bg-indigo-50 p-4 rounded-full hidden sm:block">
-                    <i data-lucide="clock" class="text-indigo-600 w-8 h-8"></i>
+                <div class="dm-indigo-soft p-4 rounded-full hidden sm:block">
+                    <i data-lucide="clock" class="text-indigo-500 w-8 h-8"></i>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-1">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 sticky top-24">
-                        <h3 class="font-semibold text-lg mb-4 flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5 text-indigo-500"></i> Nytt Innehav</h3>
+                    <div class="card rounded-2xl p-6 shadow-sm border sticky top-24">
+                        <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+                            <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-500"></i> Nytt Innehav
+                        </h3>
                         <form id="addHoldingForm" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Aktie/Tillgång</label>
-                                <input type="text" id="stockName" required placeholder="t.ex. Apple Inc." class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                                <label class="block text-sm font-medium dm-label mb-1">Aktie/Tillgång</label>
+                                <input type="text" id="stockName" required placeholder="t.ex. Apple Inc." class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Köpt Datum</label>
-                                <input type="date" id="purchaseDate" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                                <label class="block text-sm font-medium dm-label mb-1">Köpt Datum</label>
+                                <input type="date" id="purchaseDate" required class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                             </div>
-                            <!-- FUNKTION 4: Kommentarsfält -->
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Kommentar <span class="text-slate-400 font-normal">(frivillig)</span></label>
-                                <textarea id="holdingComment" maxlength="500" rows="3" placeholder="Varför köpte du detta bolag? (valfritt)" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm resize-none"></textarea>
+                                <label class="block text-sm font-medium dm-label mb-1">Kommentar <span class="dm-text-muted font-normal">(frivillig)</span></label>
+                                <textarea id="holdingComment" maxlength="500" rows="3" placeholder="Varför köpte du detta bolag? (valfritt)" class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm resize-none"></textarea>
                             </div>
-                            <button type="submit" id="addBtn" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
+                            <button type="submit" id="addBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
                                 <span id="addText">Lägg till</span>
                                 <div id="addSpinner" class="spinner hidden"></div>
                             </button>
@@ -127,33 +204,35 @@
                 </div>
 
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div class="card rounded-2xl shadow-sm border overflow-hidden">
+                        <div class="card-head px-6 py-4 border-b dm-border-light flex justify-between items-center">
                             <h3 class="font-semibold text-lg">Dina Innehav</h3>
-                            <button id="refreshBtn" class="text-slate-400 hover:text-indigo-600 transition-colors"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+                            <button id="refreshBtn" class="dm-text-muted hover:text-indigo-500 transition-colors">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
                         </div>
                         
                         <div class="hidden md:block overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-white border-b border-slate-100 text-sm text-slate-500">
-                                        <th class="px-6 py-3 font-medium cursor-pointer hover:text-slate-800 transition-colors" onclick="app.sortData('stock_name')">Namn <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
-                                        <th class="px-6 py-3 font-medium cursor-pointer hover:text-slate-800 transition-colors" onclick="app.sortData('purchase_date')">Köpt Datum <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
-                                        <th class="px-6 py-3 font-medium cursor-pointer hover:text-slate-800 transition-colors" onclick="app.sortData('days_held')">Innehavstid <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
-                                        <!-- FUNKTION 4: Kommentarskolumn -->
+                                    <tr class="dm-table-head border-b dm-border-light text-sm dm-text-secondary">
+                                        <th class="px-6 py-3 font-medium cursor-pointer hover:text-indigo-500 transition-colors" onclick="app.sortData('stock_name')">Namn <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
+                                        <th class="px-6 py-3 font-medium cursor-pointer hover:text-indigo-500 transition-colors" onclick="app.sortData('purchase_date')">Köpt Datum <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
+                                        <th class="px-6 py-3 font-medium cursor-pointer hover:text-indigo-500 transition-colors" onclick="app.sortData('days_held')">Innehavstid <i data-lucide="chevrons-up-down" class="inline w-3 h-3"></i></th>
+                                        <th class="px-6 py-3 font-medium">Nästa Jubileum</th>
                                         <th class="px-6 py-3 font-medium">Kommentar</th>
                                         <th class="px-6 py-3 font-medium text-right">Åtgärd</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tableBody" class="divide-y divide-slate-50">
+                                <tbody id="tableBody" class="dm-divide divide-y">
                                 </tbody>
                             </table>
                         </div>
 
-                        <div id="mobileCards" class="md:hidden divide-y divide-slate-100">
+                        <div id="mobileCards" class="md:hidden dm-divide divide-y">
                         </div>
 
-                        <div id="dataStateMsg" class="p-8 text-center text-slate-500 text-sm">
+                        <div id="dataStateMsg" class="p-8 text-center dm-text-secondary text-sm">
                             Laddar data...
                         </div>
                     </div>
@@ -162,54 +241,50 @@
         </main>
     </div>
 
-    <!-- ==========================================
-         FUNKTION 2: Edit-modal
-    ========================================== -->
-    <div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm fade-in">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 w-full max-w-md p-6">
+    <!-- Edit-modal -->
+    <div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
+        <div class="dm-modal-bg rounded-2xl shadow-sm border w-full max-w-md p-6">
             <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
                 <i data-lucide="pencil" class="w-5 h-5 text-indigo-500"></i> Redigera innehav
             </h3>
             <div class="space-y-4">
                 <input type="hidden" id="editId">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Aktie/Tillgång</label>
-                    <input type="text" id="editStockName" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <label class="block text-sm font-medium dm-label mb-1">Aktie/Tillgång</label>
+                    <input type="text" id="editStockName" class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Köpt Datum</label>
-                    <input type="date" id="editPurchaseDate" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <label class="block text-sm font-medium dm-label mb-1">Köpt Datum</label>
+                    <input type="date" id="editPurchaseDate" class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Kommentar <span class="text-slate-400 font-normal">(frivillig)</span></label>
-                    <textarea id="editComment" maxlength="500" rows="3" placeholder="Varför köpte du detta bolag? (valfritt)" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm resize-none"></textarea>
+                    <label class="block text-sm font-medium dm-label mb-1">Kommentar <span class="dm-text-muted font-normal">(frivillig)</span></label>
+                    <textarea id="editComment" maxlength="500" rows="3" placeholder="Varför köpte du detta bolag? (valfritt)" class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm resize-none"></textarea>
                 </div>
-                <div id="editError" class="text-red-500 text-sm hidden"></div>
+                <div id="editError" class="text-red-400 text-sm hidden"></div>
                 <div class="flex gap-3 pt-1">
                     <button id="saveEditBtn" onclick="app.saveEdit()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
                         <span id="saveEditText">Spara</span>
                         <div id="saveEditSpinner" class="spinner hidden"></div>
                     </button>
-                    <button onclick="app.closeModal()" class="flex-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-2 rounded-lg font-medium transition-colors">Avbryt</button>
+                    <button onclick="app.closeModal()" class="flex-1 dm-modal-cancel border py-2 rounded-lg font-medium transition-colors">Avbryt</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ==========================================
-         FUNKTION 1: Nytt lösenord-modal (PASSWORD_RECOVERY)
-    ========================================== -->
-    <div id="newPasswordModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm fade-in">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 w-full max-w-md p-6">
+    <!-- Nytt lösenord-modal (PASSWORD_RECOVERY) -->
+    <div id="newPasswordModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
+        <div class="dm-modal-bg rounded-2xl shadow-sm border w-full max-w-md p-6">
             <div class="flex justify-center mb-4">
-                <div class="bg-indigo-50 p-3 rounded-xl"><i data-lucide="key-round" class="text-indigo-600 w-7 h-7"></i></div>
+                <div class="dm-indigo-soft p-3 rounded-xl"><i data-lucide="key-round" class="text-indigo-500 w-7 h-7"></i></div>
             </div>
             <h3 class="font-semibold text-lg text-center mb-1">Ange nytt lösenord</h3>
-            <p class="text-slate-500 text-sm text-center mb-5">Välj ett nytt lösenord för ditt konto.</p>
+            <p class="dm-text-secondary text-sm text-center mb-5">Välj ett nytt lösenord för ditt konto.</p>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Nytt lösenord</label>
-                    <input type="password" id="newPasswordInput" placeholder="Minst 6 tecken" class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <label class="block text-sm font-medium dm-label mb-1">Nytt lösenord</label>
+                    <input type="password" id="newPasswordInput" placeholder="Minst 6 tecken" class="dm-input w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div id="newPasswordError" class="text-sm hidden"></div>
                 <button id="updatePasswordBtn" onclick="app.handleUpdatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors flex justify-center items-center h-10">
@@ -222,45 +297,43 @@
 
     <script>
         // ==========================================
-        // 1. KONFIGURATION - KLISTRA IN DINA NYCKLAR HÄR
+        // 1. KONFIGURATION
         // ==========================================
         const SUPABASE_URL = 'https://socixgiusmrnejuyeyha.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvY2l4Z2l1c21ybmVqdXlleWhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjY0MjUsImV4cCI6MjA4NDMwMjQyNX0.XZ4pQcji0mk8A5-FmBvge_ENg4mGd5EU_c8pKWX5oZY';
 
-        // ==========================================
-        // DATABAS-MIGRATION (kör manuellt i Supabase Dashboard)
-        // ==========================================
+        // DATABAS-MIGRATION (kör manuellt i Supabase Dashboard om ej gjort)
         // ALTER TABLE holdings ADD COLUMN IF NOT EXISTS comment TEXT DEFAULT '';
-        // ALTER TABLE holdings ADD COLUMN IF NOT EXISTS last_notified_period INTEGER DEFAULT 0;
+        // ALTER TABLE holdings ADD COLUMN IF NOT EXISTS next_notify_date DATE;
 
-        // Initiera Supabase
-        const supabaseUrl = SUPABASE_URL;
-        const supabaseKey = SUPABASE_ANON_KEY;
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ==========================================
-        // 2. APPLIKATIONSLOGIK (STATE & METODER)
+        // 2. APPLIKATIONSLOGIK
         // ==========================================
         const app = {
             user: null,
             holdings: [],
             sortCol: 'purchase_date',
             sortAsc: true,
-            toastOffset: 0, // Håller koll på staplade toasts
-            isRecoveringPassword: false, // Flagga för att blockera SIGNED_IN under lösenordsbyte
+            toastOffset: 0,
+            isRecoveringPassword: false,
 
             async init() {
                 lucide.createIcons();
                 document.getElementById('purchaseDate').max = new Date().toISOString().split("T")[0];
-                
-                // Event Listeners – befintliga
+
+                // Återställ mörkt läge från localStorage
+                this.initDarkMode();
+
+                // Event Listeners
                 document.getElementById('authForm').addEventListener('submit', this.handleLogin.bind(this));
                 document.getElementById('registerBtn').addEventListener('click', this.handleRegister.bind(this));
                 document.getElementById('logoutBtn').addEventListener('click', this.handleLogout.bind(this));
                 document.getElementById('addHoldingForm').addEventListener('submit', this.handleAdd.bind(this));
                 document.getElementById('refreshBtn').addEventListener('click', () => this.fetchHoldings());
+                document.getElementById('darkModeBtn').addEventListener('click', () => this.toggleDarkMode());
 
-                // FUNKTION 1: Glömt lösenord – event listeners
                 document.getElementById('forgotPasswordLink').addEventListener('click', () => {
                     document.getElementById('forgotPasswordForm').classList.remove('hidden');
                     document.getElementById('resetEmailInput').value = document.getElementById('emailInput').value;
@@ -272,12 +345,10 @@
                 });
                 document.getElementById('sendResetBtn').addEventListener('click', this.handleForgotPassword.bind(this));
 
-                // Stäng edit-modal vid klick utanför
                 document.getElementById('editModal').addEventListener('click', (e) => {
                     if (e.target === document.getElementById('editModal')) this.closeModal();
                 });
 
-                // Kolla session
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session) {
                     this.user = session.user;
@@ -286,19 +357,14 @@
                     this.showAuth();
                 }
 
-                // Lyssna på Auth-förändringar
                 supabaseClient.auth.onAuthStateChange((_event, session) => {
-                    // FUNKTION 1: Fånga PASSWORD_RECOVERY – sätt flagga och visa modal
                     if (_event === 'PASSWORD_RECOVERY') {
                         this.isRecoveringPassword = true;
                         document.getElementById('newPasswordModal').classList.remove('hidden');
                         lucide.createIcons();
                         return;
                     }
-                    // Blockera SIGNED_IN om vi är mitt i ett lösenordsbyte
-                    if (_event === 'SIGNED_IN' && this.isRecoveringPassword) {
-                        return;
-                    }
+                    if (_event === 'SIGNED_IN' && this.isRecoveringPassword) return;
                     if (session) {
                         this.user = session.user;
                         this.showDashboard();
@@ -307,6 +373,25 @@
                         this.showAuth();
                     }
                 });
+            },
+
+            // --- Mörkt läge ---
+            initDarkMode() {
+                const saved = localStorage.getItem('darkMode');
+                if (saved === 'true') {
+                    document.documentElement.classList.add('dark');
+                    document.getElementById('darkModeIcon').setAttribute('data-lucide', 'sun');
+                } else {
+                    document.getElementById('darkModeIcon').setAttribute('data-lucide', 'moon');
+                }
+                lucide.createIcons();
+            },
+
+            toggleDarkMode() {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('darkMode', isDark);
+                document.getElementById('darkModeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+                lucide.createIcons();
             },
 
             // --- UI & Navigering ---
@@ -331,9 +416,7 @@
                 const email = document.getElementById('emailInput').value;
                 const password = document.getElementById('passwordInput').value;
                 const errorEl = document.getElementById('authError');
-                
                 const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                
                 if (error) {
                     errorEl.textContent = error.message;
                     errorEl.classList.remove('hidden');
@@ -347,13 +430,11 @@
                 const email = document.getElementById('emailInput').value;
                 const password = document.getElementById('passwordInput').value;
                 const errorEl = document.getElementById('authError');
-                
-                if(!email || !password) {
+                if (!email || !password) {
                     errorEl.textContent = "Fyll i både e-post och lösenord för att registrera dig.";
                     errorEl.classList.remove('hidden');
                     return;
                 }
-
                 const { error } = await supabaseClient.auth.signUp({ email, password });
                 if (error) {
                     errorEl.textContent = error.message;
@@ -361,7 +442,7 @@
                 } else {
                     errorEl.textContent = "Konto skapat! Kolla din e-post eller logga in direkt.";
                     errorEl.classList.remove('hidden');
-                    errorEl.classList.replace('text-red-500', 'text-green-600');
+                    errorEl.classList.replace('text-red-400', 'text-green-500');
                 }
             },
 
@@ -369,78 +450,62 @@
                 await supabaseClient.auth.signOut();
             },
 
-            // --- FUNKTION 1: Glömt lösenord ---
             async handleForgotPassword() {
                 const email = document.getElementById('resetEmailInput').value.trim();
                 const msgEl = document.getElementById('resetMsg');
-
                 if (!email) {
                     msgEl.textContent = 'Ange din e-postadress.';
-                    msgEl.className = 'text-sm text-red-500';
+                    msgEl.className = 'text-sm text-red-400';
                     msgEl.classList.remove('hidden');
                     return;
                 }
-
                 document.getElementById('sendResetBtn').disabled = true;
                 document.getElementById('sendResetBtn').textContent = 'Skickar...';
-
-                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.href
-                });
-
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
                 document.getElementById('sendResetBtn').disabled = false;
                 document.getElementById('sendResetBtn').textContent = 'Skicka återställningslänk';
-
                 if (error) {
                     msgEl.textContent = 'Fel: ' + error.message;
-                    msgEl.className = 'text-sm text-red-500';
+                    msgEl.className = 'text-sm text-red-400';
                 } else {
                     msgEl.textContent = '✓ Länk skickad! Kolla din inkorg (och skräppost).';
-                    msgEl.className = 'text-sm text-green-600';
+                    msgEl.className = 'text-sm text-green-500';
                 }
                 msgEl.classList.remove('hidden');
             },
 
-            // --- FUNKTION 1: Uppdatera lösenord efter recovery ---
             async handleUpdatePassword() {
                 const newPassword = document.getElementById('newPasswordInput').value;
                 const errEl = document.getElementById('newPasswordError');
-
                 if (!newPassword || newPassword.length < 6) {
                     errEl.textContent = 'Lösenordet måste vara minst 6 tecken.';
-                    errEl.className = 'text-sm text-red-500';
+                    errEl.className = 'text-sm text-red-400';
                     errEl.classList.remove('hidden');
                     return;
                 }
-
                 this.setLoading('updatePasswordBtn', 'updatePasswordText', 'updatePasswordSpinner', true);
                 const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
                 this.setLoading('updatePasswordBtn', 'updatePasswordText', 'updatePasswordSpinner', false);
-
                 if (error) {
                     errEl.textContent = 'Fel: ' + error.message;
-                    errEl.className = 'text-sm text-red-500';
+                    errEl.className = 'text-sm text-red-400';
                     errEl.classList.remove('hidden');
                 } else {
                     errEl.textContent = '✓ Lösenordet har uppdaterats!';
-                    errEl.className = 'text-sm text-green-600';
+                    errEl.className = 'text-sm text-green-500';
                     errEl.classList.remove('hidden');
                     setTimeout(async () => {
-                        this.isRecoveringPassword = false; // Nollställ flaggan
+                        this.isRecoveringPassword = false;
                         document.getElementById('newPasswordModal').classList.add('hidden');
-                        // Hämta aktuell session och navigera till dashboard
                         const { data: { session } } = await supabaseClient.auth.getSession();
-                        if (session) {
-                            this.user = session.user;
-                            this.showDashboard();
-                        }
+                        if (session) { this.user = session.user; this.showDashboard(); }
                     }, 1500);
                 }
             },
 
             // --- Databasoperationer ---
             async fetchHoldings() {
-                document.getElementById('dataStateMsg').innerHTML = '<div class="spinner border-slate-300 border-t-indigo-600 mx-auto mb-2"></div> Laddar...';
+                document.getElementById('dataStateMsg').innerHTML = '<div class="spinner border-slate-300 border-t-indigo-500 mx-auto mb-2"></div> Laddar...';
                 document.getElementById('dataStateMsg').classList.remove('hidden');
                 document.getElementById('tableBody').innerHTML = '';
                 document.getElementById('mobileCards').innerHTML = '';
@@ -456,27 +521,21 @@
                     return;
                 }
 
-                // Beräkna metadata (dagar hållna) för sortering och rendering
                 this.holdings = data.map(item => {
                     const duration = this.calcDuration(item.purchase_date);
                     return { ...item, durationStr: duration.str, days_held: duration.totalDays };
                 });
 
                 this.renderData();
-
-                // FUNKTION 3: Kontrollera jubileumsmilstolpar efter rendering
                 this.checkMilestones();
             },
 
             async handleAdd(e) {
                 e.preventDefault();
                 this.setLoading('addBtn', 'addText', 'addSpinner', true);
-                
                 const stock_name = document.getElementById('stockName').value;
                 const purchase_date = document.getElementById('purchaseDate').value;
                 const comment = document.getElementById('holdingComment').value.trim();
-
-                // Beräkna nästa jämna 3-månadersgräns från purchase_date som ligger i framtiden
                 const next_notify_date = this.calcNextNotifyDate(purchase_date);
 
                 const { error } = await supabaseClient
@@ -489,18 +548,15 @@
                     alert('Ett fel uppstod: ' + error.message);
                 } else {
                     document.getElementById('addHoldingForm').reset();
+                    // ✓ Bekräftelse-toast vid tillägg
+                    this.showToast(`✓ ${stock_name} har lagts till i portföljen`, 3000, 'indigo');
                     this.fetchHoldings();
                 }
             },
 
             async handleDelete(id) {
-                if(!confirm('Är du säker på att du vill radera innehavet?')) return;
-                
-                const { error } = await supabaseClient
-                    .from('holdings')
-                    .delete()
-                    .eq('id', id);
-
+                if (!confirm('Är du säker på att du vill radera innehavet?')) return;
+                const { error } = await supabaseClient.from('holdings').delete().eq('id', id);
                 if (error) {
                     alert('Kunde inte radera: ' + error.message);
                 } else {
@@ -508,11 +564,9 @@
                 }
             },
 
-            // --- FUNKTION 2: Redigera innehav ---
             handleEdit(id) {
                 const holding = this.holdings.find(h => h.id === id);
                 if (!holding) return;
-
                 document.getElementById('editId').value = id;
                 document.getElementById('editStockName').value = holding.stock_name;
                 document.getElementById('editPurchaseDate').value = holding.purchase_date;
@@ -528,25 +582,18 @@
                 const purchase_date = document.getElementById('editPurchaseDate').value;
                 const comment = document.getElementById('editComment').value.trim();
                 const errEl = document.getElementById('editError');
-
                 if (!stock_name || !purchase_date) {
                     errEl.textContent = 'Namn och datum är obligatoriska.';
                     errEl.classList.remove('hidden');
                     return;
                 }
-
-                // Räkna om next_notify_date om purchase_date ändrats
                 const next_notify_date = this.calcNextNotifyDate(purchase_date);
-
                 this.setLoading('saveEditBtn', 'saveEditText', 'saveEditSpinner', true);
-
                 const { error } = await supabaseClient
                     .from('holdings')
                     .update({ stock_name, purchase_date, comment, next_notify_date })
                     .eq('id', id);
-
                 this.setLoading('saveEditBtn', 'saveEditText', 'saveEditSpinner', false);
-
                 if (error) {
                     errEl.textContent = 'Fel vid sparande: ' + error.message;
                     errEl.classList.remove('hidden');
@@ -560,75 +607,78 @@
                 document.getElementById('editModal').classList.add('hidden');
             },
 
-            // --- FUNKTION 3: Jubileumsmilstolpar ---
+            // --- Jubileumsmilstolpar ---
             async checkMilestones() {
-                // Begär notistillstånd om möjligt (HTTPS + stödd webbläsare)
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission();
                 }
-
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
                 for (const h of this.holdings) {
                     if (!h.next_notify_date) continue;
-
                     const notifyDate = new Date(h.next_notify_date);
                     notifyDate.setHours(0, 0, 0, 0);
 
-                    // Visa toast endast om next_notify_date är exakt idag
-                    // (inte om den redan passerat – det hanteras av Edge Function via mejl)
                     if (notifyDate.getTime() === today.getTime()) {
                         const durationStr = this.calcDuration(h.purchase_date).str;
                         const message = `🎉 ${h.stock_name} har du ägt i ${durationStr} – fortsätt så!`;
-
-                        this.showToast(message);
-
+                        this.showToast(message, 6000, 'emerald');
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('HoldingTracker – Jubileum! 🎉', { body: message });
                         }
-
-                        // Flytta next_notify_date 3 månader framåt i databasen
-                        // så att samma jubileum inte visas igen vid nästa inloggning
                         const nextDate = new Date(notifyDate);
                         nextDate.setMonth(nextDate.getMonth() + 3);
-                        const nextDateStr = nextDate.toISOString().split('T')[0];
-
                         await supabaseClient
                             .from('holdings')
-                            .update({ next_notify_date: nextDateStr })
+                            .update({ next_notify_date: nextDate.toISOString().split('T')[0] })
                             .eq('id', h.id);
                     }
                 }
             },
 
-            // Beräkna nästa jämna 3-månadersgräns från purchase_date som ligger i framtiden
+            // Beräkna nästa jämna 3-månadersgräns i framtiden
             calcNextNotifyDate(purchaseDateStr) {
                 const purchase = new Date(purchaseDateStr);
                 const now = new Date();
                 now.setHours(0, 0, 0, 0);
-
                 const totalMonths =
                     (now.getFullYear() - purchase.getFullYear()) * 12 +
                     (now.getMonth() - purchase.getMonth());
                 const periodsElapsed = Math.floor(totalMonths / 3);
-
                 const nextDate = new Date(purchase);
                 nextDate.setMonth(nextDate.getMonth() + (periodsElapsed + 1) * 3);
                 return nextDate.toISOString().split('T')[0];
             },
 
-            // --- FUNKTION 3: Toast-notis ---
-            showToast(message, durationMs = 6000) {
+            // Formatera nästa jubileumsdatum som "om X dgr" eller datum
+            formatNextJubilee(dateStr) {
+                if (!dateStr) return '–';
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                const target = new Date(dateStr);
+                target.setHours(0, 0, 0, 0);
+                const diffDays = Math.round((target - now) / (1000 * 60 * 60 * 24));
+                if (diffDays === 0) return 'Idag 🎉';
+                if (diffDays <= 14) return `om ${diffDays} dgr`;
+                if (diffDays <= 60) return `om ${Math.round(diffDays / 7)} v`;
+                // Visa datum för längre bort
+                return target.toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' });
+            },
+
+            // --- Toast ---
+            showToast(message, durationMs = 6000, color = 'emerald') {
                 const toast = document.createElement('div');
                 const topOffset = 16 + (this.toastOffset * 68);
                 this.toastOffset++;
-
-                toast.className = 'toast-enter fixed right-4 z-50 bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium max-w-xs';
+                const colorMap = {
+                    emerald: 'bg-emerald-500',
+                    indigo:  'bg-indigo-500',
+                };
+                toast.className = `toast-enter fixed right-4 z-50 ${colorMap[color] || 'bg-emerald-500'} text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium max-w-xs`;
                 toast.style.top = `${topOffset}px`;
                 toast.textContent = message;
                 document.body.appendChild(toast);
-
                 setTimeout(() => {
                     toast.style.transition = 'opacity 0.4s ease';
                     toast.style.opacity = '0';
@@ -643,44 +693,27 @@
             calcDuration(dateStr) {
                 const start = new Date(dateStr);
                 const end = new Date();
-                
-                // Total dagar för sortering/medelvärde
                 const diffTime = Math.abs(end - start);
                 const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
                 let years = end.getFullYear() - start.getFullYear();
                 let months = end.getMonth() - start.getMonth();
                 let days = end.getDate() - start.getDate();
-
-                if (days < 0) {
-                    months--;
-                    const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-                    days += prevMonth.getDate();
-                }
-                if (months < 0) {
-                    years--;
-                    months += 12;
-                }
-
+                if (days < 0) { months--; days += new Date(end.getFullYear(), end.getMonth(), 0).getDate(); }
+                if (months < 0) { years--; months += 12; }
                 if (years < 0) return { str: "0 dagar", totalDays: 0 };
-
                 let parts = [];
                 if (years > 0) parts.push(`${years} år`);
                 if (months > 0) parts.push(`${months} mån`);
                 if (days > 0 || parts.length === 0) parts.push(`${days} dgr`);
-
                 return { str: parts.join(', '), totalDays };
             },
 
             calcAverage() {
-                if(this.holdings.length === 0) return "--";
-                const sumDays = this.holdings.reduce((sum, h) => sum + h.days_held, 0);
-                const avgDays = Math.round(sumDays / this.holdings.length);
-                
+                if (this.holdings.length === 0) return "--";
+                const avgDays = Math.round(this.holdings.reduce((s, h) => s + h.days_held, 0) / this.holdings.length);
                 const years = Math.floor(avgDays / 365);
                 const months = Math.floor((avgDays % 365) / 30);
                 const days = (avgDays % 365) % 30;
-
                 let parts = [];
                 if (years > 0) parts.push(`${years} år`);
                 if (months > 0) parts.push(`${months} mån`);
@@ -690,20 +723,11 @@
 
             // --- Rendering & Utility ---
             sortData(col) {
-                if (this.sortCol === col) {
-                    this.sortAsc = !this.sortAsc;
-                } else {
-                    this.sortCol = col;
-                    this.sortAsc = true;
-                }
-                
-                // Sortera array i minnet för snabb UI-uppdatering
+                if (this.sortCol === col) { this.sortAsc = !this.sortAsc; }
+                else { this.sortCol = col; this.sortAsc = true; }
                 this.holdings.sort((a, b) => {
-                    let valA = a[col];
-                    let valB = b[col];
-                    if(col === 'stock_name') {
-                        valA = valA.toLowerCase(); valB = valB.toLowerCase();
-                    }
+                    let valA = a[col], valB = b[col];
+                    if (col === 'stock_name') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
                     if (valA < valB) return this.sortAsc ? -1 : 1;
                     if (valA > valB) return this.sortAsc ? 1 : -1;
                     return 0;
@@ -715,8 +739,6 @@
                 const tbody = document.getElementById('tableBody');
                 const mobileDiv = document.getElementById('mobileCards');
                 const msg = document.getElementById('dataStateMsg');
-                
-                // Uppdatera snitt
                 document.getElementById('avgHoldTime').textContent = this.calcAverage();
 
                 if (this.holdings.length === 0) {
@@ -730,31 +752,37 @@
                 let cardHtml = '';
 
                 this.holdings.forEach(h => {
-                    // FUNKTION 4: Kommentar – trunkera vid 60 tecken för desktop
-                    const commentShort = h.comment && h.comment.length > 60
-                        ? this.escapeHTML(h.comment.substring(0, 60)) + '...'
+                    const commentShort = h.comment && h.comment.length > 50
+                        ? this.escapeHTML(h.comment.substring(0, 50)) + '...'
                         : this.escapeHTML(h.comment || '');
                     const commentFull = this.escapeHTML(h.comment || '');
+                    const nextJubilee = this.formatNextJubilee(h.next_notify_date);
+                    const isToday = h.next_notify_date && nextJubilee === 'Idag 🎉';
+                    const isSoon = h.next_notify_date && !isToday &&
+                        Math.round((new Date(h.next_notify_date) - new Date()) / (1000 * 60 * 60 * 24)) <= 14;
 
                     // Desktop Row
                     trHtml += `
-                        <tr class="hover:bg-slate-50 transition-colors group">
-                            <td class="px-6 py-4 font-medium text-slate-800">${this.escapeHTML(h.stock_name)}</td>
-                            <td class="px-6 py-4 text-slate-500">${h.purchase_date}</td>
+                        <tr class="dm-hover transition-colors">
+                            <td class="px-6 py-4 font-medium">${this.escapeHTML(h.stock_name)}</td>
+                            <td class="px-6 py-4 dm-text-secondary">${h.purchase_date}</td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium dm-badge">
                                     ${h.durationStr}
                                 </span>
                             </td>
-                            <!-- FUNKTION 4: Kommentarskolumn -->
-                            <td class="px-6 py-4 text-slate-400 text-sm" title="${commentFull}">${commentShort || '<span class="text-slate-200">—</span>'}</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isToday ? 'bg-amber-100 text-amber-800' : isSoon ? 'bg-orange-50 text-orange-700' : 'dm-next-badge'}">
+                                    <i data-lucide="bell" class="w-3 h-3 mr-1"></i>${nextJubilee}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 dm-text-muted text-sm" title="${commentFull}">${commentShort || '<span class="opacity-30">—</span>'}</td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-2">
-                                    <!-- FUNKTION 2: Edit-knapp -->
-                                    <button onclick="app.handleEdit('${h.id}')" class="text-slate-300 hover:text-indigo-500 transition-colors" title="Redigera">
+                                    <button onclick="app.handleEdit('${h.id}')" class="dm-text-muted hover:text-indigo-500 transition-colors" title="Redigera">
                                         <i data-lucide="pencil" class="w-4 h-4"></i>
                                     </button>
-                                    <button onclick="app.handleDelete('${h.id}')" class="text-slate-300 hover:text-red-500 transition-colors" title="Radera">
+                                    <button onclick="app.handleDelete('${h.id}')" class="dm-text-muted hover:text-red-400 transition-colors" title="Radera">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
@@ -764,7 +792,7 @@
 
                     // Mobile Card
                     const commentMobile = h.comment ? `
-                        <div class="flex items-start gap-1.5 text-xs text-slate-400 mt-1">
+                        <div class="flex items-start gap-1.5 text-xs dm-text-muted mt-1">
                             <i data-lucide="message-square" class="w-3 h-3 mt-0.5 shrink-0"></i>
                             <span>${this.escapeHTML(h.comment)}</span>
                         </div>` : '';
@@ -772,22 +800,24 @@
                     cardHtml += `
                         <div class="p-4 flex flex-col gap-2">
                             <div class="flex justify-between items-start">
-                                <span class="font-medium text-slate-800">${this.escapeHTML(h.stock_name)}</span>
+                                <span class="font-medium">${this.escapeHTML(h.stock_name)}</span>
                                 <div class="flex items-center gap-1">
-                                    <!-- FUNKTION 2: Edit-knapp mobil -->
-                                    <button onclick="app.handleEdit('${h.id}')" class="text-slate-300 hover:text-indigo-500 p-1">
+                                    <button onclick="app.handleEdit('${h.id}')" class="dm-text-muted hover:text-indigo-500 p-1">
                                         <i data-lucide="pencil" class="w-4 h-4"></i>
                                     </button>
-                                    <button onclick="app.handleDelete('${h.id}')" class="text-slate-300 hover:text-red-500 p-1">
+                                    <button onclick="app.handleDelete('${h.id}')" class="dm-text-muted hover:text-red-400 p-1">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center text-sm">
-                                <span class="text-slate-500"><i data-lucide="calendar" class="inline w-3 h-3 mr-1"></i>${h.purchase_date}</span>
-                                <span class="font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md text-xs">${h.durationStr}</span>
+                                <span class="dm-text-secondary"><i data-lucide="calendar" class="inline w-3 h-3 mr-1"></i>${h.purchase_date}</span>
+                                <span class="font-medium dm-badge px-2 py-1 rounded-md text-xs">${h.durationStr}</span>
                             </div>
-                            <!-- FUNKTION 4: Kommentar mobil -->
+                            <div class="flex items-center gap-1.5 text-xs dm-next-badge px-2 py-1 rounded-md w-fit">
+                                <i data-lucide="bell" class="w-3 h-3"></i>
+                                <span>Nästa jubileum: ${nextJubilee}</span>
+                            </div>
                             ${commentMobile}
                         </div>
                     `;
@@ -795,7 +825,7 @@
 
                 tbody.innerHTML = trHtml;
                 mobileDiv.innerHTML = cardHtml;
-                lucide.createIcons(); // Ladda om ikoner för ny renderad HTML
+                lucide.createIcons();
             },
 
             setLoading(btnId, textId, spinnerId, isLoading) {
@@ -806,15 +836,10 @@
 
             escapeHTML(str) {
                 if (!str) return '';
-                return str.replace(/[&<>'"]/g, 
-                    tag => ({
-                        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-                    }[tag])
-                );
+                return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag]));
             }
         };
 
-        // Starta appen när DOM laddat
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
