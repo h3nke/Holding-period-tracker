@@ -576,16 +576,28 @@
                     const notifyDate = new Date(h.next_notify_date);
                     notifyDate.setHours(0, 0, 0, 0);
 
-                    // Visa toast om next_notify_date är idag eller har passerat
-                    if (notifyDate <= today) {
+                    // Visa toast endast om next_notify_date är exakt idag
+                    // (inte om den redan passerat – det hanteras av Edge Function via mejl)
+                    if (notifyDate.getTime() === today.getTime()) {
                         const durationStr = this.calcDuration(h.purchase_date).str;
-                        const message = `🎉 Du har ägt ${h.stock_name} i ${durationStr} – fortsätt så!`;
+                        const message = `🎉 ${h.stock_name} har du ägt i ${durationStr} – fortsätt så!`;
 
                         this.showToast(message);
 
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('HoldingTracker – Jubileum! 🎉', { body: message });
                         }
+
+                        // Flytta next_notify_date 3 månader framåt i databasen
+                        // så att samma jubileum inte visas igen vid nästa inloggning
+                        const nextDate = new Date(notifyDate);
+                        nextDate.setMonth(nextDate.getMonth() + 3);
+                        const nextDateStr = nextDate.toISOString().split('T')[0];
+
+                        await supabaseClient
+                            .from('holdings')
+                            .update({ next_notify_date: nextDateStr })
+                            .eq('id', h.id);
                     }
                 }
             },
