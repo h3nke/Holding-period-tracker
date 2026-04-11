@@ -542,7 +542,7 @@
 
                 this.holdings = data.map(item => {
                     const duration = this.calcDuration(item.purchase_date);
-                    const jubilee = this.formatNextJubilee(item.next_notify_date);
+                    const jubilee = this.formatNextJubilee(item.next_notify_date, item.purchase_date);
                     return { ...item, durationStr: duration.str, days_held: duration.totalDays, days_to_jubilee: jubilee.days };
                 });
 
@@ -677,7 +677,7 @@
             },
 
             // Formatera nästa jubileum som antal dagar (sorterbart)
-            formatNextJubilee(dateStr) {
+            formatNextJubilee(dateStr, purchaseDateStr) {
                 if (!dateStr) return { text: '–', days: 99999 };
                 const todayStr = new Date().toLocaleDateString('sv-SE');
                 const diffDays = Math.round(
@@ -685,6 +685,23 @@
                     / (1000 * 60 * 60 * 24)
                 );
                 if (diffDays === 0) return { text: 'Jubileumsdag!', days: 0 };
+
+                // Kolla om jubileet faktiskt inföll IDAG men datumet redan rullats framåt av Edge Function
+                // Logik: om purchase_date + N*3 månader = idag, för något heltal N > 0
+                if (purchaseDateStr && diffDays > 0) {
+                    const purchase = new Date(purchaseDateStr + 'T12:00:00');
+                    const today = new Date(todayStr + 'T12:00:00');
+                    let p = 1;
+                    while (p <= 200) {
+                        const candidate = new Date(purchase);
+                        candidate.setMonth(candidate.getMonth() + p * 3);
+                        const candidateStr = candidate.toLocaleDateString('sv-SE');
+                        if (candidateStr === todayStr) return { text: 'Jubileumsdag!', days: 0 };
+                        if (candidate > today) break;
+                        p++;
+                    }
+                }
+
                 if (diffDays === 1) return { text: 'om 1 dag', days: 1 };
                 return { text: `om ${diffDays} dgr`, days: diffDays };
             },
@@ -780,7 +797,7 @@
                         ? this.escapeHTML(h.comment.substring(0, 50)) + '...'
                         : this.escapeHTML(h.comment || '');
                     const commentFull = this.escapeHTML(h.comment || '');
-                    const jubilee = this.formatNextJubilee(h.next_notify_date);
+                    const jubilee = this.formatNextJubilee(h.next_notify_date, h.purchase_date);
                     const jubileeText = jubilee.text;
                     const isToday = jubilee.days === 0;
                     const isSoon = !isToday && jubilee.days <= 14;
