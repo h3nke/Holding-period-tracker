@@ -663,23 +663,21 @@
                 }
             },
 
-            // Beräkna nästa jämna 3-månadersgräns i framtiden (dag-exakt)
+            // Beräkna nästa jämna 3-månadersgräns i framtiden (dag-exakt, tidszonsäker)
             calcNextNotifyDate(purchaseDateStr) {
-                const purchase = new Date(purchaseDateStr);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                const purchase = new Date(purchaseDateStr + 'T12:00:00');
+                const todayStr = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD i lokal tid
 
-                // Iterera 3-månadersgränser framåt tills vi hittar en som är idag eller senare
                 let periods = 1;
                 while (true) {
                     const candidate = new Date(purchase);
                     candidate.setMonth(candidate.getMonth() + periods * 3);
-                    candidate.setHours(0, 0, 0, 0);
-                    if (candidate >= today) {
-                        return candidate.toISOString().split('T')[0];
+                    const candidateStr = candidate.toLocaleDateString('sv-SE');
+                    if (candidateStr >= todayStr) {
+                        return candidateStr;
                     }
                     periods++;
-                    if (periods > 200) break; // säkerhetsgräns (~50 år)
+                    if (periods > 200) break;
                 }
                 return null;
             },
@@ -687,11 +685,11 @@
             // Formatera nästa jubileum som antal dagar (sorterbart)
             formatNextJubilee(dateStr) {
                 if (!dateStr) return { text: '–', days: 99999 };
-                const now = new Date();
-                now.setHours(0, 0, 0, 0);
-                const target = new Date(dateStr);
-                target.setHours(0, 0, 0, 0);
-                const diffDays = Math.round((target - now) / (1000 * 60 * 60 * 24));
+                const todayStr = new Date().toLocaleDateString('sv-SE');
+                const diffDays = Math.round(
+                    (new Date(dateStr + 'T12:00:00') - new Date(todayStr + 'T12:00:00'))
+                    / (1000 * 60 * 60 * 24)
+                );
                 if (diffDays === 0) return { text: 'Jubileumsdag!', days: 0 };
                 if (diffDays === 1) return { text: 'om 1 dag', days: 1 };
                 return { text: `om ${diffDays} dgr`, days: diffDays };
