@@ -638,27 +638,21 @@
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission();
                 }
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                const todayStr = new Date().toLocaleDateString('sv-SE');
 
                 for (const h of this.holdings) {
                     if (!h.next_notify_date) continue;
-                    const notifyDate = new Date(h.next_notify_date);
-                    notifyDate.setHours(0, 0, 0, 0);
 
-                    if (notifyDate.getTime() === today.getTime()) {
+                    // Visa toast endast om next_notify_date är exakt idag
+                    // Databasen uppdateras ENBART av Edge Function – aldrig härifrån
+                    if (h.next_notify_date === todayStr) {
                         const durationStr = this.calcDuration(h.purchase_date).str;
                         const message = `🎉 ${h.stock_name} har du ägt i ${durationStr} – fortsätt så!`;
                         this.showToast(message, 6000, 'emerald');
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('HoldingTracker – Jubileum! 🎉', { body: message });
                         }
-                        const nextDate = new Date(notifyDate);
-                        nextDate.setMonth(nextDate.getMonth() + 3);
-                        await supabaseClient
-                            .from('holdings')
-                            .update({ next_notify_date: nextDate.toISOString().split('T')[0] })
-                            .eq('id', h.id);
+                        // Ingen databasuppdatering här – Edge Function sköter det kl 08:00
                     }
                 }
             },
